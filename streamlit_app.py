@@ -20,14 +20,16 @@ nltk.download('wordnet')
 sw = set(stopwords.words('english'))
 
 # Veri yükleme ve temizleme
-@st.cache
+@st.cache_data
 def load_and_clean_data():
     df = pd.read_csv("Twitter_Data.csv")
-    df['clean_text'] = df['clean_text'].str.lower()
-    df['clean_text'] = df['clean_text'].apply(lambda x: re.sub(r'[^\w\s]', '', x))
-    df['clean_text'] = df['clean_text'].apply(lambda x: re.sub(r'\d', '', x))
-    df['clean_text'] = df['clean_text'].apply(lambda x: " ".join(word for word in x.split() if word not in sw))
-    df['clean_text'] = df['clean_text'].apply(lambda x: " ".join(Word(word).lemmatize() for word in x.split()))
+    df['clean_text'] = df['clean_text'].fillna("")  # Boş değerleri doldur
+    df['clean_text'] = df['clean_text'].astype(str)  # String tipini zorla
+    df['clean_text'] = df['clean_text'].str.lower()  # Küçük harfe çevir
+    df['clean_text'] = df['clean_text'].apply(lambda x: re.sub(r'[^\w\s]', '', x))  # Noktalama işaretlerini temizle
+    df['clean_text'] = df['clean_text'].apply(lambda x: re.sub(r'\d', '', x))  # Rakamları kaldır
+    df['clean_text'] = df['clean_text'].apply(lambda x: " ".join(word for word in x.split() if word not in sw))  # Stopwords kaldır
+    df['clean_text'] = df['clean_text'].apply(lambda x: " ".join(Word(word).lemmatize() for word in x.split()))  # Lemmatize et
     return df
 
 df1 = load_and_clean_data()

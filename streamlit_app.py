@@ -7,7 +7,6 @@ from textblob import Word
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report
 from warnings import filterwarnings
 
 # Uyarıları kapatma
@@ -51,9 +50,6 @@ def train_logistic_model(x_train, y_train):
 
 log_model = train_logistic_model(x_train_tf_idf_word, train_y)
 
-# Performans değerlendirme
-log_model_score = cross_val_score(log_model, x_test_tf_idf_word, test_y, cv=5).mean()
-
 # Kullanıcı girdisi için tahmin fonksiyonu
 def predict_sentiment(user_input, model, vectorizer):
     if not user_input.strip():
@@ -76,8 +72,6 @@ def predict_sentiment(user_input, model, vectorizer):
 
 # Streamlit arayüzü
 st.title("Twitter Duygu Analizi")
-
-st.write("Logistic Regression Model Performansı: %.2f" % log_model_score)
 
 user_input = st.text_input("Lütfen bir yorum girin:")
 if user_input:

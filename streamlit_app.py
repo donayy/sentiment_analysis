@@ -25,6 +25,7 @@ def load_and_clean_data():
     df = pd.read_csv("Twitter_Data.csv")
     df.rename(columns={'category': 'sentiment'}, inplace=True)  # Sütun adını değiştirme
     df['sentiment'] = df['sentiment'].map({1.0: 'pos', 0.0: 'neutral', -1.0: 'neg'})  # Kategorileri etiketleme
+    df = df.dropna(subset=['sentiment'])  # Eksik değerleri kaldır
     df['clean_text'] = df['clean_text'].fillna("")  # Boş değerleri doldur
     df['clean_text'] = df['clean_text'].astype(str)  # String tipini zorla
     df['clean_text'] = df['clean_text'].str.lower()  # Küçük harfe çevir

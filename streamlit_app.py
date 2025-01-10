@@ -23,6 +23,8 @@ sw = set(stopwords.words('english'))
 @st.cache_data
 def load_and_clean_data():
     df = pd.read_csv("Twitter_Data.csv")
+    df.rename(columns={'category': 'sentiment'}, inplace=True)  # Sütun adını değiştirme
+    df['sentiment'] = df['sentiment'].map({1.0: 'pos', 0.0: 'neutral', -1.0: 'neg'})  # Kategorileri etiketleme
     df['clean_text'] = df['clean_text'].fillna("")  # Boş değerleri doldur
     df['clean_text'] = df['clean_text'].astype(str)  # String tipini zorla
     df['clean_text'] = df['clean_text'].str.lower()  # Küçük harfe çevir
@@ -74,6 +76,8 @@ def predict_sentiment(user_input, model, vectorizer):
         user_input_vector = vectorizer.transform([user_input])
         user_prediction = model.predict(user_input_vector)[0]
 
+        if user_prediction == 'neutral':
+            return "Girilen yorumun duygusal tonu nötr."
         return "Girilen yorumun duygusal tonu pozitif." if user_prediction == 'pos' else "Girilen yorumun duygusal tonu negatif."
     except Exception as e:
         return f"Bir hata oluştu: {e}"

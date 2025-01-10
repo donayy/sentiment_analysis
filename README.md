@@ -1,5 +1,6 @@
 # Twitter Sentiment Analysis
 This project analyzes the sentiment of Twitter data using a machine learning approach. It provides predictions for whether a given text is positive or negative based on a trained model. The application is built with Python and deployed using Streamlit.
+
 Live demo : https://tweet-tone.streamlit.app/
 
 ## Features

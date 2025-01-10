@@ -18,7 +18,7 @@ except LookupError:
     st.error("Gerekli NLTK veri dosyaları yüklenemedi. Lütfen 'nltk.download()' komutlarını çalıştırın.")
     sw = set()  # Hata durumunda boş set
 
-# Veri yükleme ve temizleme
+# Loading and cleaning dataset
 @st.cache_data
 def load_and_clean_data():
     df = pd.read_csv("Twitter_Data.csv")
@@ -36,10 +36,10 @@ def load_and_clean_data():
 
 df1 = load_and_clean_data()
 
-# Model eğitimi
+# Model training
 train_x, test_x, train_y, test_y = train_test_split(df1['clean_text'], df1['sentiment'], random_state=42)
 
-# TF-IDF vektörizasyonu
+# TF-IDF vectorization
 tf_idf_word_vectorizer = TfidfVectorizer().fit(train_x)
 x_train_tf_idf_word = tf_idf_word_vectorizer.transform(train_x)
 x_test_tf_idf_word = tf_idf_word_vectorizer.transform(test_x)
@@ -47,10 +47,10 @@ x_test_tf_idf_word = tf_idf_word_vectorizer.transform(test_x)
 # Logistic Regression Model
 log_model = LogisticRegression().fit(x_train_tf_idf_word, train_y)
 
-# Kullanıcı girdisi için tahmin fonksiyonu
+# Prediction function for user input
 def predict_sentiment(user_input, model, vectorizer):
     if not user_input.strip():
-        return "Lütfen geçerli bir yorum girin."
+        return "Please enter a valid comment."
     try:
         user_input = user_input.lower()
         user_input = re.sub(r'[^\w\s]', '', user_input)
@@ -62,15 +62,15 @@ def predict_sentiment(user_input, model, vectorizer):
         user_prediction = model.predict(user_input_vector)[0]
 
         if user_prediction == 'neutral':
-            return "Girilen yorumun duygusal tonu nötr."
-        return "Girilen yorumun duygusal tonu pozitif." if user_prediction == 'pos' else "Girilen yorumun duygusal tonu negatif."
+            return "The sentiment of the entered comment is neutral."
+        return "The sentiment of the entered comment is positive." if user_prediction == 'pos' else "The sentiment of the entered comment is negative."
     except Exception as e:
-        return f"Bir hata oluştu: {e}"
+        return f"An error occurred: {e}"
 
-# Streamlit arayüzü
-st.title("Twitter Duygu Analizi")
+# Streamlit app
+st.title("Twitter Sentiment Analysis")
 
-user_input = st.text_input("Lütfen bir yorum girin:")
+user_input = st.text_input("Please enter a comment:")
 if user_input:
     result = predict_sentiment(user_input, log_model, tf_idf_word_vectorizer)
     st.write(result)

@@ -2,35 +2,36 @@ import streamlit as st
 import pandas as pd
 import re
 import nltk
-from nltk.corpus import stopwords
 from textblob import Word
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
-from warnings import filterwarnings
 
-# Uyarıları kapatma
-filterwarnings('ignore')
-nltk.download('stopwords')
-nltk.download('wordnet')
 
-# Stopwords yükleme
-sw = set(stopwords.words('english'))
+# NLTK veri dosyalarını yükleme
+try:
+    nltk.download('stopwords')
+    nltk.download('wordnet')
+    from nltk.corpus import stopwords
+    sw = set(stopwords.words('english'))
+except LookupError:
+    st.error("Gerekli NLTK veri dosyaları yüklenemedi. Lütfen 'nltk.download()' komutlarını çalıştırın.")
+    sw = set()  # Hata durumunda boş set
 
 # Veri yükleme ve temizleme
 @st.cache_data
 def load_and_clean_data():
     df = pd.read_csv("Twitter_Data.csv")
-    df.rename(columns={'category': 'sentiment'}, inplace=True)  # Sütun adını değiştirme
-    df['sentiment'] = df['sentiment'].map({1.0: 'pos', 0.0: 'neutral', -1.0: 'neg'})  # Kategorileri etiketleme
-    df = df.dropna(subset=['sentiment'])  # Eksik değerleri kaldır
-    df['clean_text'] = df['clean_text'].fillna("")  # Boş değerleri doldur
-    df['clean_text'] = df['clean_text'].astype(str)  # String tipini zorla
-    df['clean_text'] = df['clean_text'].str.lower()  # Küçük harfe çevir
-    df['clean_text'] = df['clean_text'].apply(lambda x: re.sub(r'[^\w\s]', '', x))  # Noktalama işaretlerini temizle
-    df['clean_text'] = df['clean_text'].apply(lambda x: re.sub(r'\d', '', x))  # Rakamları kaldır
-    df['clean_text'] = df['clean_text'].apply(lambda x: " ".join(word for word in x.split() if word not in sw))  # Stopwords kaldır
-    df['clean_text'] = df['clean_text'].apply(lambda x: " ".join(Word(word).lemmatize() for word in x.split()))  # Lemmatize et
+    df.rename(columns={'category': 'sentiment'}, inplace=True)
+    df['sentiment'] = df['sentiment'].map({1.0: 'pos', 0.0: 'neutral', -1.0: 'neg'})
+    df = df.dropna(subset=['sentiment'])
+    df['clean_text'] = df['clean_text'].fillna("")
+    df['clean_text'] = df['clean_text'].astype(str)
+    df['clean_text'] = df['clean_text'].str.lower()
+    df['clean_text'] = df['clean_text'].apply(lambda x: re.sub(r'[^\w\s]', '', x))
+    df['clean_text'] = df['clean_text'].apply(lambda x: re.sub(r'\d', '', x))
+    df['clean_text'] = df['clean_text'].apply(lambda x: " ".join(word for word in x.split() if word not in sw))
+    df['clean_text'] = df['clean_text'].apply(lambda x: " ".join(Word(word).lemmatize() for word in x.split()))
     return df
 
 df1 = load_and_clean_data()
@@ -44,11 +45,7 @@ x_train_tf_idf_word = tf_idf_word_vectorizer.transform(train_x)
 x_test_tf_idf_word = tf_idf_word_vectorizer.transform(test_x)
 
 # Logistic Regression Model
-def train_logistic_model(x_train, y_train):
-    model = LogisticRegression().fit(x_train, y_train)
-    return model
-
-log_model = train_logistic_model(x_train_tf_idf_word, train_y)
+log_model = LogisticRegression().fit(x_train_tf_idf_word, train_y)
 
 # Kullanıcı girdisi için tahmin fonksiyonu
 def predict_sentiment(user_input, model, vectorizer):

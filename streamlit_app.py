@@ -8,7 +8,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
-from sklearn.ensemble import RandomForestClassifier
 from warnings import filterwarnings
 
 # Uyarıları kapatma
@@ -52,16 +51,8 @@ def train_logistic_model(x_train, y_train):
 
 log_model = train_logistic_model(x_train_tf_idf_word, train_y)
 
-# Random Forest Model
-def train_rf_model(x_train, y_train):
-    model = RandomForestClassifier().fit(x_train, y_train)
-    return model
-
-rf_model = train_rf_model(x_train_tf_idf_word, train_y)
-
 # Performans değerlendirme
 log_model_score = cross_val_score(log_model, x_test_tf_idf_word, test_y, cv=5).mean()
-rf_model_score = cross_val_score(rf_model, x_test_tf_idf_word, test_y, cv=5, n_jobs=-1).mean()
 
 # Kullanıcı girdisi için tahmin fonksiyonu
 def predict_sentiment(user_input, model, vectorizer):
@@ -87,7 +78,6 @@ def predict_sentiment(user_input, model, vectorizer):
 st.title("Twitter Duygu Analizi")
 
 st.write("Logistic Regression Model Performansı: %.2f" % log_model_score)
-st.write("Random Forest Model Performansı: %.2f" % rf_model_score)
 
 user_input = st.text_input("Lütfen bir yorum girin:")
 if user_input:
